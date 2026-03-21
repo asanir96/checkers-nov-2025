@@ -1,0 +1,84 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --square-width: calc(calc(100vw - 200px) / 8);
+    --min-square-width: calc(calc(500px - 200px) / 8)
+}
+
+body {
+    display: flex;
+}
+
+
+.board {
+    /* flex-shrink: 1; */
+    width: max-content;
+    margin: auto auto;
+    display: grid;
+    grid-template-columns: repeat(8, max(var(--square-width),var(--min-square-width)));
+    grid-template-rows: repeat(8, max(var(--square-width),var(--min-square-width)));
+
+    border: 1px solid black
+}
+
+.square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square.active {
+    background-color: burlywood;
+    border: 1px solid orange;
+}
+
+.square.active:hover {
+    background-color: rgb(245, 211, 133);
+    
+}
+
+.piece:hover {
+    background-color: burlywood;
+}
+
+.white-square {
+    background-color: #eee;
+}
+
+.black-square {
+    background-color: #555;
+}
+
+.piece {
+    border-radius: 50%;
+    width: 80%;
+    height: 80%;
+
+    border: 1px black solid
+}
+
+.piece.active {
+    background-color: rgb(248, 203, 145);
+    border: 1px solid orange;
+
+}
+
+.white-piece {
+    background-color: white;
+}
+
+.black-piece {
+    background-color: black;
+}
+
+.eat{
+    background-color: rgb(161, 80, 80);
+    border: 1px solid brown;
+}
+
+.eat-move-land-square{
+    background-color: rgb(110, 110, 244);
+    border: 1px solid rgb(44, 44, 243);
+}

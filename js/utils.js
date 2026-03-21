@@ -1,0 +1,34 @@
+'use strict'
+function getNeighborPos(mat, row, col) {
+    const neighborPos = []
+    const cell = mat[row][col]
+
+    for (var i = row - 1; i <= row + 1; i++) {
+        if (i < 0 || i >= mat.length) continue
+
+        for (var j = col - 1; j <= col + 1; j++) {
+            if (j < 0 || j >= mat[i].length) continue
+            if (i === row && j === col) continue
+
+            neighborPos.push({ i, j })
+        }
+    }
+    return neighborPos
+}
+
+function getSquareDist(square1Pos, square2pos, piece) {
+    const distJ =  (square1Pos.j - square2pos.j)
+    const distI =  (square1Pos.i - square2pos.i)
+
+    return { i: distI, j: distJ }
+}
+
+
+function getAbsDist(dist) {
+    var absDist = 0
+    for (var dimDist in dist) {
+        absDist+= Math.abs(dist[dimDist])
+    }
+
+    return absDist
+}
