@@ -3,7 +3,7 @@
 }
 
 :root {
-    --square-width: calc(calc(100vw - 200px) / 8);
+    --square-width: calc(calc(100vw - 50vw) / 8);
     --min-square-width: calc(calc(500px - 200px) / 8)
 }
 
@@ -57,6 +57,10 @@ body {
     height: 80%;
 
     border: 1px black solid
+}
+.piece.eaten-move{
+    opacity: 0.5;
+    border: 2px solid rgb(165, 126, 42);
 }
 
 .piece.active {
