@@ -35,7 +35,28 @@ function getAbsDist(dist) {
 
 function containsObject(array, obj) {
     for (var idx = 0; idx < array.length; idx++) {
-        if (array[idx].landPos.i===obj.i && array[idx].landPos.j===obj.j) return true
+        if (array[idx].landPos.i === obj.i && array[idx].landPos.j === obj.j) return true
     }
     return false
+}
+
+function getSquareDOMpos(pos) {
+    const elSquare = document.querySelector(`.square-${pos.i}-${pos.j}`)
+    const elPiece = elSquare.querySelector(`.piece`)
+    const rect = elSquare.getBoundingClientRect()
+
+    return { x: rect.x, y: rect.y }
+    console.log('rect.top', rect)
+    console.log('rect.left', rect.left)
+    // return {}
+    elPiece.style.transform = `translate(${moveX}, ${moveY})`;
+
+}
+
+
+function getTranslatePos(oldTranslatePos, newTranslatePos) {
+    console.log('oldTranslatePos',oldTranslatePos)
+    console.log('newTranslatePos',newTranslatePos)
+    const translatePos = { x: newTranslatePos.x - oldTranslatePos.x, y: newTranslatePos.y - oldTranslatePos.y }
+    return translatePos
 }
