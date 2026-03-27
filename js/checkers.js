@@ -12,7 +12,7 @@ const gBoard = [
 ]
 var gIntervalID
 var gActivePiecePos = null
-var gPossiblePathPos = []
+var gPossiblePathPos
 var isAnimationOn = false
 var gPathIdx = 0
 const piece = { pos: { x: 0, y: 0 }, color: 'white' }
@@ -61,7 +61,9 @@ function onPieceClick(elPiece, i, j) {
 
     // var elPiece = document.querySelector(`.square-${gActivePiecePos.i}-${gActivePiecePos.j} .piece`)
     elPiece.classList.add('active')
-    markPossibleSquares(i, j, gBoard[i][j])
+    addPossiblePaths(i, j, gBoard[i][j])
+    markPossibleSquares()
+
 }
 
 function handlePieceMovement(elSquare, i, j) {
@@ -72,21 +74,19 @@ function handlePieceMovement(elSquare, i, j) {
 
     gBoard[gActivePiecePos.i][gActivePiecePos.j] = ''
 
-
-    var chosenPath
-    for (var idx = 0; idx < gPossiblePathPos.length; idx++) {
-        if (containsObject(gPossiblePathPos[idx], selectedPos)) {
-            chosenPath = gPossiblePathPos[idx]
-        }
-    }
+    var chosenPath = gPossiblePathPos.filter(path => path.some(step =>
+        step.landPos.i === selectedPos.i && step.landPos.j === selectedPos.j
+    )
+    )[0]
 
 
-    if (chosenPath) {
+
+    if (chosenPath[0].eatPos) {
         var oldPiecePos = gActivePiecePos
-        
+
         isAnimationOn = true
         gIntervalID = setInterval(() => {
-            
+
             if (oldPiecePos.i === i && oldPiecePos.j === j) {
                 clearInterval(gIntervalID)
 
@@ -169,10 +169,10 @@ function clearActiveSquares() {
     }
 }
 
-function markPossibleSquares(i, j, piece) {
+function addPossiblePaths(i, j, piece) {
     const dir = piece === 'w' ? 1 : -1
     const squareNegPos = getNeighborPos(gBoard, i, j)
-    const possibleEatPos = []
+
     for (var idx = 0; idx < squareNegPos.length; idx++) {
         var currPos = squareNegPos[idx]
         var currNeg = gBoard[currPos.i][currPos.j]
@@ -180,22 +180,41 @@ function markPossibleSquares(i, j, piece) {
         var dist = getSquareDist(currPos, { i, j }, piece)
         var absDist = getAbsDist(dist)
 
-        var currLandPos = { i: (currPos.i + dist.i), j: (currPos.j + dist.j) }
+        var currLandPos = { i: currPos.i, j: currPos.j }
 
         if (dir * currPos.i <= dir * i) {
             continue
 
         } else if (absDist === 2 && currNeg === '') {
+            gPossiblePathPos.push([{ 'landPos': currLandPos }])
 
-            var elCurrNegSquare = document.querySelector(`.square-${currPos.i}-${currPos.j}`)
-            elCurrNegSquare.classList.add('active')
-
-        } else if (currNeg !== piece && currNeg !== '' && gBoard[currLandPos.i][currLandPos.j] === '') {
-            gPossiblePathPos.push(markPossibleCaptureMoves(currPos, currLandPos, [], currNeg))
+        } else if (currNeg !== piece && currNeg !== '' && gBoard[currLandPos.i + dist.i][currLandPos.j + dist.j] === '') {
+            currLandPos.i += dist.i
+            currLandPos.j += dist.j
+            gPossiblePathPos.push(getCapturePath(currPos, currLandPos, [], currNeg))
         } else {
             continue
         }
+
+        if (gPossiblePathPos.some(path => path[0].eatPos)) gPossiblePathPos = gPossiblePathPos.filter(path => path[0].eatPos)
     }
+}
+
+function markPossibleSquares() {
+    gPossiblePathPos.forEach(path => path.forEach(step => {
+        var elLandSquare = document.querySelector(`.square-${step.landPos.i}-${step.landPos.j}`)
+        if (step.eatPos) {
+            var elRivalSquare = document.querySelector(`.square-${step.eatPos.i}-${step.eatPos.j}`)
+            elRivalSquare.classList.add('eat')
+
+            var elRivalPiece = elRivalSquare.querySelector(`.piece`)
+            elRivalPiece.classList.add('eaten-move')
+
+            elLandSquare.classList.add('eat-move-land-square')
+        } else {
+            elLandSquare.classList.add('active')
+        }
+    }))
 }
 
 function markPossibleDiagSquares() {
@@ -227,18 +246,18 @@ function isEatPossible() {
 
 }
 
-function markPossibleCaptureMoves(rivalNegPos, landingPos, pathPos, piece) {
+function getCapturePath(rivalNegPos, landingPos, pathPos, piece) {
 
     pathPos.push({ 'eatPos': rivalNegPos, 'landPos': landingPos })
 
-    var elCurrNegSquare = document.querySelector(`.square-${rivalNegPos.i}-${rivalNegPos.j}`)
-    elCurrNegSquare.classList.add('eat')
+    // var elCurrNegSquare = document.querySelector(`.square-${rivalNegPos.i}-${rivalNegPos.j}`)
+    // elCurrNegSquare.classList.add('eat')
 
-    var elCurrNegPiece = elCurrNegSquare.querySelector(`.piece`)
-    elCurrNegPiece.classList.add('eaten-move')
+    // var elCurrNegPiece = elCurrNegSquare.querySelector(`.piece`)
+    // elCurrNegPiece.classList.add('eaten-move')
 
-    var elCurrNegLandSquare = document.querySelector(`.square-${landingPos.i}-${landingPos.j}`)
-    elCurrNegLandSquare.classList.add('eat-move-land-square')
+    // var elCurrNegLandSquare = document.querySelector(`.square-${landingPos.i}-${landingPos.j}`)
+    // elCurrNegLandSquare.classList.add('eat-move-land-square')
 
     const negPos = getNeighborPos(gBoard, landingPos.i, landingPos.j)
 
@@ -259,7 +278,7 @@ function markPossibleCaptureMoves(rivalNegPos, landingPos, pathPos, piece) {
         if (currNextPos.i === rivalNegPos.i && currNextPos.j === rivalNegPos.j) continue
 
         if (currNextNeg === piece && gBoard[currNexLandPos.i][currNexLandPos.j] === '') {
-            markPossibleCaptureMoves(currNextPos, currNexLandPos, pathPos, piece)
+            getCapturePath(currNextPos, currNexLandPos, pathPos, piece)
         }
 
     }
@@ -293,6 +312,7 @@ function renderPiece(oldPos, translatePos, newPos) {
 }
 
 function hopMove(oldPiecePos, chosenPath, activePiece) {
+    console.log('chosenPath', chosenPath)
     gBoard[oldPiecePos.i][oldPiecePos.j] = ''
     gBoard[chosenPath[gPathIdx].landPos.i][chosenPath[gPathIdx].landPos.j] = activePiece
 
