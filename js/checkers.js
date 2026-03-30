@@ -1,25 +1,45 @@
 'use strict'
 
-const gBoard = [
-    ['', 'w', '', 'w', '', 'w', '', 'w'],
-    ['w', '', 'w', '', 'w', '', 'w', ''],
-    ['', 'w', '', 'w', '', 'w', '', 'w'],
-    ['', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', ''],
-    ['b', '', 'b', '', 'b', '', 'b', ''],
-    ['', 'b', '', 'b', '', 'b', '', 'b'],
-    ['b', '', 'b', '', 'b', '', 'b', '']
-]
+// const gBoard = [
+//     ['', 'w', '', 'w', '', 'w', '', 'w'],
+//     ['w', '', 'w', '', 'w', '', 'w', ''],
+//     ['', 'w', '', 'w', '', 'w', '', 'w'],
+//     ['', '', '', '', '', '', '', ''],
+//     ['', '', '', '', '', '', '', ''],
+//     ['b', '', 'b', '', 'b', '', 'b', ''],
+//     ['', 'b', '', 'b', '', 'b', '', 'b'],
+//     ['b', '', 'b', '', 'b', '', 'b', '']
+// ]
+const gBoardSize = 8
+var gInaugurationRow
+var gBoard
 var gIntervalID
 var gActivePiecePos = null
 var gPossiblePathPos
 var isAnimationOn = false
 var gPathIdx = 0
 const piece = { pos: { x: 0, y: 0 }, color: 'white' }
+
 function onInit() {
-    // gBoard = createBoard()
+    gBoard = createBoard()
+    gInaugurationRow = { b: 0, w: gBoardSize - 1 }
+    console.table(gBoard)
     renderBoard('.board', gBoard)
 
+}
+
+function createBoard() {
+    const board = []
+    for (var i = 0; i < gBoardSize; i++) {
+        board[i] = []
+        for (var j = 0; j < gBoardSize; j++) {
+            board[i][j] = ''
+            if ((i + j) % 2 !== 0 && (i <= 2 || i >= 5)) {
+                board[i][j] = { isQueen: false, color: i <= 2 ? 'w' : 'b' }
+            }
+        }
+    }
+    return board
 }
 
 
@@ -140,20 +160,20 @@ function eatRivalPiece(chosenPath, idx) {
     elCurrRivalPiece.style.zIndex = '-10'
 }
 
-function createBoard(size) {
-    for (var i = 0; i < size; i++) {
-        if (i % 2 !== 0) {
-            evenPiece = 'white'
-            oddSquareClassName = 'black'
-        } else {
-            evenSquareClassName = 'black'
-            oddSquareClassName = 'white'
-        }
+// function createBoard(size) {
+//     for (var i = 0; i < size; i++) {
+//         if (i % 2 !== 0) {
+//             evenPiece = 'white'
+//             oddSquareClassName = 'black'
+//         } else {
+//             evenSquareClassName = 'black'
+//             oddSquareClassName = 'white'
+//         }
 
-        for (var j = 0; j < size; j++) {
-        }
-    }
-}
+//         for (var j = 0; j < size; j++) {
+//         }
+//     }
+// }
 
 function clearActiveSquares() {
     for (var i = 0; i < gBoard.length; i++) {
@@ -170,7 +190,7 @@ function clearActiveSquares() {
 }
 
 function addPossiblePaths(i, j, piece) {
-    const dir = piece === 'w' ? 1 : -1
+    const dir = piece.color === 'w' ? 1 : -1
     const squareNegPos = getNeighborPos(gBoard, i, j)
 
     for (var idx = 0; idx < squareNegPos.length; idx++) {
@@ -185,10 +205,13 @@ function addPossiblePaths(i, j, piece) {
         if (dir * currPos.i <= dir * i) {
             continue
 
-        } else if (absDist === 2 && currNeg === '') {
+        } else if (absDist === 2 && currNeg === '' ||
+            currPos.i === 0 ||
+            currPos.i === gBoardSize - 2
+        ) {
             gPossiblePathPos.push([{ 'landPos': currLandPos }])
 
-        } else if (currNeg !== piece && currNeg !== '' && gBoard[currLandPos.i + dist.i][currLandPos.j + dist.j] === '') {
+        } else if (currNeg.color !== piece.color && currNeg !== '' && gBoard[currLandPos.i + dist.i][currLandPos.j + dist.j] === '') {
             currLandPos.i += dist.i
             currLandPos.j += dist.j
             gPossiblePathPos.push(getCapturePath(currPos, currLandPos, [], currNeg))
@@ -288,8 +311,8 @@ function getCapturePath(rivalNegPos, landingPos, pathPos, piece) {
 
 function renderPiece(oldPos, translatePos, newPos) {
     const piece = gBoard[newPos.i][newPos.j]
-    if (piece === 'w') var pieceStrHTML = `<div class = "piece white-piece" onclick="onPieceClick(this,${newPos.i},${newPos.j})"> </div>`
-    else if (piece === 'b') var pieceStrHTML = `<div class = "piece black-piece" onclick="onPieceClick(this,${newPos.i},${newPos.j})"> </div>`
+    if (piece.color === 'w') var pieceStrHTML = `<div class = "piece white-piece" onclick="onPieceClick(this,${newPos.i},${newPos.j})"> </div>`
+    else if (piece.color === 'b') var pieceStrHTML = `<div class = "piece black-piece" onclick="onPieceClick(this,${newPos.i},${newPos.j})"> </div>`
 
     const elOldSquare = document.querySelector(`.square-${oldPos.i}-${oldPos.j}`)
     elOldSquare.classList.remove('active')
@@ -312,7 +335,6 @@ function renderPiece(oldPos, translatePos, newPos) {
 }
 
 function hopMove(oldPiecePos, chosenPath, activePiece) {
-    console.log('chosenPath', chosenPath)
     gBoard[oldPiecePos.i][oldPiecePos.j] = ''
     gBoard[chosenPath[gPathIdx].landPos.i][chosenPath[gPathIdx].landPos.j] = activePiece
 
