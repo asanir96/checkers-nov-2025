@@ -55,8 +55,6 @@ function getSquareDOMpos(pos) {
 
 
 function getTranslatePos(oldTranslatePos, newTranslatePos) {
-    console.log('oldTranslatePos',oldTranslatePos)
-    console.log('newTranslatePos',newTranslatePos)
     const translatePos = { x: newTranslatePos.x - oldTranslatePos.x, y: newTranslatePos.y - oldTranslatePos.y }
     return translatePos
 }

@@ -23,7 +23,7 @@ body {
 }
 
 .square {
-    position:relative;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,4 +106,43 @@ body {
 .eat-move-land-square:hover {
     background-color: rgb(148, 148, 231);
 
+}
+
+.b-queen {
+    border: 0.2vw solid rgba(255, 255, 255, 0.744);
+    box-shadow: inset 2px 2px 10px;
+
+
+    background: radial-gradient(circle at 30% 30%,
+            #ffffff 0%,
+            #666666 8%,
+            #222222 25%,
+            #000000 55%,
+            #111111 75%,
+            #444444 90%,
+            #000000 100%);
+    /* background-color: rgb(0, 0, 0); */
+    animation: glow 1s infinite alternate;
+}
+
+.w-queen {
+    background: radial-gradient(circle at 30% 30%,
+            #ffffff 0%,
+            #e6e6e6 10%,
+            #bfbfbf 25%,
+            #808080 45%,
+            #bfbfbf 65%,
+            #f2f2f2 80%,
+            #999999 100%);
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px -10px rgb(255, 255, 255);
+    }
+
+    to {
+        box-shadow: 0 0 10px 10px rgb(246, 246, 246);
+    }
 }

@@ -58,8 +58,8 @@ function renderBoard(boardContSelector, board) {
                             onmousehover= "onHover(this)"
                             onclick = "handlePieceMovement(this,${i},${j})">`
 
-            if (currPiece === 'w') var pieceStrHTML = `<div class = "piece white-piece" onclick="onPieceClick(this,${i},${j})"> </div>`
-            else if (currPiece === 'b') var pieceStrHTML = `<div class = "piece black-piece" onclick="onPieceClick(this,${i},${j})"> </div>`
+            if (currPiece.color === 'w') var pieceStrHTML = `<div class = "piece white-piece" onclick="onPieceClick(this,${i},${j})"> </div>`
+            else if (currPiece.color === 'b') var pieceStrHTML = `<div class = "piece black-piece" onclick="onPieceClick(this,${i},${j})"> </div>`
             else var pieceStrHTML = ''
 
             strHTML += `${pieceStrHTML} </div>`
@@ -143,6 +143,11 @@ function handlePieceMovement(elSquare, i, j) {
 
     }
 
+    console.log('gInaugurationRow[activePiece.color]',gInaugurationRow[activePiece.color])
+    if (i === gInaugurationRow[activePiece.color]) {
+        activePiece.isQueen = true
+    }
+
     // renderBoard('.board', gBoard)
 }
 
@@ -206,8 +211,7 @@ function addPossiblePaths(i, j, piece) {
             continue
 
         } else if (absDist === 2 && currNeg === '' ||
-            currPos.i === 0 ||
-            currPos.i === gBoardSize - 2
+            currPos.i === gInaugurationRow[piece.color]
         ) {
             gPossiblePathPos.push([{ 'landPos': currLandPos }])
 
@@ -250,7 +254,7 @@ function getPossibleEatPos(board, pos) {
     for (var idx = 0; idx < squareNegPos.length; idx++) {
         var currPos = squareNegPos[idx]
         var currNeg = gBoard[currPos.i][currPos.j]
-        if (currNeg === piece || getSquareDist({ i, j }, currPos) > 1) {
+        if (currNeg.color === piece.color || getSquareDist({ i, j }, currPos) > 1) {
             continue
         }
 
@@ -300,7 +304,7 @@ function getCapturePath(rivalNegPos, landingPos, pathPos, piece) {
 
         if (currNextPos.i === rivalNegPos.i && currNextPos.j === rivalNegPos.j) continue
 
-        if (currNextNeg === piece && gBoard[currNexLandPos.i][currNexLandPos.j] === '') {
+        if (currNextNeg.color === piece.color && gBoard[currNexLandPos.i][currNexLandPos.j] === '') {
             getCapturePath(currNextPos, currNexLandPos, pathPos, piece)
         }
 
@@ -327,8 +331,7 @@ function renderPiece(oldPos, translatePos, newPos) {
     setTimeout(() => {
         elOldSquare.innerHTML = ''
         elNewSquare.innerHTML = pieceStrHTML
-        // elNewSquare.innerHTML = pieceStrHTML
-        // elOldSquare.innerHTML = ''
+        if (piece.isQueen) renderQueen(newPos,piece)
     }, 300)
 
 
@@ -353,4 +356,11 @@ function eatMove(oldPiecePos, chosenPath, activePiece) {
 
     oldPiecePos = chosenPath[gPathIdx].landPos
     gPathIdx++
+}
+
+function renderQueen(piecePos,piece) {
+    const elPiece = document.querySelector(`.square-${piecePos.i}-${piecePos.j}  .piece`)
+    console.log('elPiece', elPiece)
+
+    elPiece.classList.add(`${piece.color}-queen`)
 }
