@@ -12,27 +12,13 @@ function _createBoard() {
         for (var j = 0; j < gBoardSize; j++) {
             gBoard[i][j] = ''
             if ((i + j) % 2 !== 0 && (i <= 2 || i >= 5)) {
-                gBoard[i][j] = _createPiece(false, i <= 2 ? 'w' : 'b')
+                gBoard[i][j] = createPiece(false, i <= 2 ? 'w' : 'b')
             }
         }
     }
 }
 
-function _createPiece(isQueen, color) {
-    return { id: makeid(), isQueen, color }
-}
-function getPiece(pieceId) {
-    const pieces = gBoard.reduce((acc, row) => {
-        acc.push(...row.filter(cell => cell !== ''))
-        return acc
-    }, [])
-    return pieces.find(pieces => pieces.id === pieceId)
-}
 
-function updatePiece(pieceId, property, value) {
-    const piece = getPiece(pieceId)
-    piece[property] = value
-}
 
 function getBoard() {
     return gBoard

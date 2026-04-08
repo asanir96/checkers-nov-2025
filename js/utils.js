@@ -16,22 +16,10 @@ function getNeighborPos(mat, row, col) {
     return neighborPos
 }
 
-function getSquareDist(square1Pos, square2pos, piece) {
-    const distJ = (square1Pos.j - square2pos.j)
-    const distI = (square1Pos.i - square2pos.i)
-
-    return { i: distI, j: distJ }
-}
 
 
-function getAbsDist(dist) {
-    var absDist = 0
-    for (var dimDist in dist) {
-        absDist += Math.abs(dist[dimDist])
-    }
 
-    return absDist
-}
+
 
 function containsObject(array, obj) {
     for (var idx = 0; idx < array.length; idx++) {

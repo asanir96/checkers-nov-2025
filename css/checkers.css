@@ -65,7 +65,7 @@ body {
 
     box-shadow: -1px 1px 2px black;
     border: 1px black solid;
-    transition: 0.3s;
+    /* transition: 1.2s; */
     /* transform: translate(200px 220px); */
 }
 
@@ -145,4 +145,10 @@ body {
     to {
         box-shadow: 0 0 10px 10px rgb(246, 246, 246);
     }
+}
+
+.move {
+    box-shadow: -10px 10px 10px rgba(0, 0, 0, 0.803);
+    transition: 0.4s;
+
 }

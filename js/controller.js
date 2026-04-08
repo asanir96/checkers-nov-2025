@@ -51,7 +51,8 @@ function onMarkPossiblePaths(elPiece, i, j) {
     gActivePiecePos = { i, j }
 
     elPiece.classList.add('active')
-    createPossiblePaths(i, j, board[i][j])
+    if (board[gActivePiecePos.i][gActivePiecePos.j].isQueen) createQueenPaths(i, j, board[gActivePiecePos.i][gActivePiecePos.j])
+    else createPossiblePaths(i, j, board[i][j])
     markPossibleSquares()
 
 }
@@ -60,15 +61,16 @@ function onMoveToSquare(elSquare, i, j) {
     const board = getBoard()
     const possiblePaths = getPossiblePaths()
 
-    if (!possiblePaths || !isPosInPaths({ i, j }, possiblePaths) ) return
+    if (!possiblePaths || !isPosInPaths({ i, j }, possiblePaths)) return
 
     const selectedPos = { i, j }
     const activePiece = board[gActivePiecePos.i][gActivePiecePos.j]
+    const elActivePiece = document.querySelector(`.square-${gActivePiecePos.i}-${gActivePiecePos.j} .piece`)
 
     updateSquare(gActivePiecePos, '')
 
     var chosenPath = possiblePaths.filter(path => path.some(step =>
-        step.landPos.i === selectedPos.i && step.landPos.j === selectedPos.j
+        step.to.i === selectedPos.i && step.to.j === selectedPos.j
     )
     )[0]
 
@@ -91,10 +93,11 @@ function onMoveToSquare(elSquare, i, j) {
 
             hopMove(oldPiecePos, chosenPath, activePiece)
             eatRivalPiece(chosenPath, gPathIdx)
-
-            oldPiecePos = chosenPath[gPathIdx].landPos
+            oldPiecePos = chosenPath[gPathIdx].to
+            console.log('chosenPath[gPathIdx].to', chosenPath[gPathIdx].to)
+            console.log('')
             gPathIdx++
-        }, 400, gActivePiecePos, i, j)
+        }, 800, gActivePiecePos, i, j)
     } else {
         clearActiveSquares()
         updateSquare({ i, j }, activePiece)
@@ -103,8 +106,9 @@ function onMoveToSquare(elSquare, i, j) {
         const squareRect = originSquare.getBoundingClientRect()
         const oldTranslatePos = { x: squareRect.x, y: squareRect.y }
         const newTranslatePos = getSquareDOMpos({ i, j })
-        const translatePos = getTranslatePos(oldTranslatePos, newTranslatePos)
 
+        const translatePos = getTranslatePos(oldTranslatePos, newTranslatePos)
+        elActivePiece.classList.add('move')
         renderPiece(gActivePiecePos, translatePos, { i, j })
         gActivePiecePos = null
 
@@ -115,7 +119,7 @@ function eatRivalPiece(chosenPath, idx) {
     var currRivalPiecePos = chosenPath[idx].eatPos
     updateSquare(currRivalPiecePos, '')
 
-    var currLandPos = chosenPath[idx].landPos
+    var currLandPos = chosenPath[idx].to
 
     var elCurrRivalPiece = document.querySelector(`.square-${currRivalPiecePos.i}-${currRivalPiecePos.j} .piece`)
     elCurrRivalPiece.style.opacity = '0'
@@ -144,7 +148,7 @@ function markPossibleSquares() {
     const possiblePaths = getPossiblePaths()
     console.log(possiblePaths)
     possiblePaths.forEach(path => path.forEach(step => {
-        var elLandSquare = document.querySelector(`.square-${step.landPos.i}-${step.landPos.j}`)
+        var elLandSquare = document.querySelector(`.square-${step.to.i}-${step.to.j}`)
         if (step.eatPos) {
             var elRivalSquare = document.querySelector(`.square-${step.eatPos.i}-${step.eatPos.j}`)
             elRivalSquare.classList.add('eat')
@@ -160,6 +164,7 @@ function markPossibleSquares() {
 }
 
 function renderPiece(oldPos, translatePos, newPos) {
+    isAnimationOn = true
     const board = getBoard()
     const piece = board[newPos.i][newPos.j]
 
@@ -180,22 +185,29 @@ function renderPiece(oldPos, translatePos, newPos) {
         elOldSquare.innerHTML = ''
         elNewSquare.innerHTML = pieceStrHTML
         if (piece.isQueen) renderQueen(newPos, piece)
-    }, 300)
+
+        isAnimationOn = false
+    }, 400)
 
 
 }
 
 function hopMove(oldPiecePos, chosenPath, activePiece) {
-    updateSquare(oldPiecePos, '')
-    updateSquare(chosenPath[gPathIdx].landPos, activePiece)
-
+    console.log('oldPiecePos', oldPiecePos)
+    console.log('activePiece', activePiece)
     const elOriginSquare = document.querySelector(`.square-${oldPiecePos.i}-${oldPiecePos.j}`)
+    console.dir(elOriginSquare.children[0])
+    const elActivePiece = elOriginSquare.querySelector('.piece')
     const squareRect = elOriginSquare.getBoundingClientRect()
     const oldTranslatePos = { x: squareRect.x, y: squareRect.y }
-    const newTranslatePos = getSquareDOMpos(chosenPath[gPathIdx].landPos)
+    const newTranslatePos = getSquareDOMpos(chosenPath[gPathIdx].to)
     const translatePos = getTranslatePos(oldTranslatePos, newTranslatePos)
 
-    renderPiece(oldPiecePos, translatePos, chosenPath[gPathIdx].landPos)
+    updateSquare(oldPiecePos, '')
+    updateSquare(chosenPath[gPathIdx].to, activePiece)
+
+    elActivePiece.classList.add('move')
+    renderPiece(oldPiecePos, translatePos, chosenPath[gPathIdx].to)
 }
 
 function eatMove(oldPiecePos, chosenPath, activePiece) {
@@ -213,5 +225,5 @@ function renderQueen(piecePos, piece) {
 }
 
 function isPosInPaths(pos, paths) {
-    return paths.some(path => path.some(step =>  step.landPos.i === pos.i && step.landPos.j === pos.j))
+    return paths.some(path => path.some(step => step.to.i === pos.i && step.to.j === pos.j))
 }
